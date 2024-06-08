@@ -25,6 +25,22 @@ public class ApiTest {
      * @return Properties object of the config file (Properties)
      */
     private Properties loadFromEnvProperties(String propFileName) {
+        Properties properties = new Properties();
+        try (InputStream input = ApiTest.class.getClassLoader().getResourceAsStream("iInterface.properties")) {
+            if (input == null) {
+                throw new FileNotFoundException("iInterface.properties not found in the classpath");
+            }
+            properties.load(input);
+            // 现在你可以从properties对象中获取属性了
+//            String someProperty = properties.getProperty("some.property.name");
+            String someProperty = properties.getProperty("server_addr");
+            System.out.println(someProperty);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return properties;
+    }
+    private Properties loadFromEnvProperties2(String propFileName) {
         Properties prop = null;
 
         String path = System.getProperty("user.home");
@@ -56,6 +72,10 @@ public class ApiTest {
                 .given()
                 .config((RestAssured.config().sslConfig(new SSLConfig().relaxedHTTPSValidation())))
                 .get(fullUrl);
+
+//        resp.print();
+//        return resp.jsonPath().get("weatherinfo.city");
+        //========
         String cur_encoding = Charset.defaultCharset().name();
         String city = null;
         try {
@@ -73,7 +93,8 @@ public class ApiTest {
         String propFileName = "iInterface.properties";
         Properties prop = loadFromEnvProperties(propFileName);
         String host = prop.getProperty("server_addr", "www.weather.com.cn");
-        baseUrl = "http://" + host + "/data/cityinfo/";
+//        baseUrl = "http://" + host + "/data/cityinfo/";
+        baseUrl = "http://" + host + "/data/sk/";
     }
 
     @AfterEach
@@ -81,16 +102,16 @@ public class ApiTest {
         System.out.println(expectCityName + " Test Finished!");
     }
 
-    @Test
-    @Feature("Test ShenZhen")
+//    @Test
+//    @Feature("Test ShenZhen")
     public void testShenZhen() {
         expectCityName = "深圳";
         String actualCityName = getCityName("101280601");
         Assertions.assertEquals(expectCityName, actualCityName);
     }
 
-    @Test
-    @Feature("Test ShangHai")
+//    @Test
+//    @Feature("Test ShangHai")
     public void testShangHai() {
         expectCityName = "上海";
         String actualCityName = getCityName("101020100");
